@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import time
 
-#Python package keras-metrics could be useful for this (I'm the package's author).
+
 import tensorflow.keras.metrics
 #import keras
 #import keras_metrics
