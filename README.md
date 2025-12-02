@@ -1,63 +1,89 @@
-Overview
+Protein Contact-Map Prediction from Tessellation Features
 
-This project implements a 1D Convolutional Neural Network (CNN) to predict protein contact-map classes using tessellation-derived residue-pair features. Each sample represents a pair of amino acid residues, along with geometric and structural descriptors extracted from protein tessellation analysis. The model learns to classify each residue pair into one of 10 contact categories, reflecting spatial or functional relationships within the protein structure.
+This project implements a 1D Convolutional Neural Network (CNN) to classify residue–residue contact-map categories using tessellation-derived geometric features. Each row in the dataset represents a pair of amino acids and its corresponding structural descriptors extracted from protein tessellation analysis. The model predicts one of 10 contact classes based on these features.
 
-What the Code Does
+📂 Dataset Description
 
-Loads tessellation feature data
-The script reads Step1_output.csv, which contains:
+The input file Step1_output.csv contains:
 
-A residue-pair identifier (e.g., GLU-LEU)
+Residue pair (e.g., GLU-LEU, ALA-GLY)
 
-12 numerical tessellation features
+12 tessellation features per residue pair
 
-One-hot encoded labels for 10 contact-map classes
+One-hot encoded labels for the 10 contact-map classes
 
-Encodes residue pairs
-The categorical residue-pair strings are converted into numeric IDs using LabelEncoder so they can be used as model input.
+Rows are shuffled at runtime to remove bias.
 
-Prepares the dataset
+🧬 Pipeline Overview
+1. Residue-Pair Encoding
 
-First 12 columns → input features
+Residue-pair strings are converted into numeric IDs using LabelEncoder, enabling them to be used as model features.
 
-Remaining columns → contact-class labels
+2. Feature & Label Preparation
 
-Reshapes inputs to (samples, 12, 1) to match the Conv1D architecture
+Features: first 12 numeric columns
 
-Defines a 1D CNN classifier
-The model consists of:
+Labels: remaining columns (10-class one-hot vectors)
 
-1 Conv1D layer (64 filters, kernel size 3)
+Features are reshaped into (samples, 12, 1) for 1D convolution.
 
-Flatten layer
+🧠 Model Architecture (1D CNN)
+Input (12 × 1)
+   ↓
+Conv1D (64 filters, kernel size 3, ReLU)
+   ↓
+Flatten
+   ↓
+Dense (N neurons, ReLU)
+Dense (N neurons, ReLU)
+Dense (N neurons, ReLU)
+Dense (N neurons, ReLU)
+   ↓
+Dense (10, Softmax)
 
-Four Dense layers with ReLU activation
 
-Softmax output layer for 10 classes
+Where N (number of neurons per dense layer) is randomly sampled for each run.
 
-Random hyperparameter search (100 trials)
-For each iteration, the script randomly samples:
+🎛 Hyperparameter Search
 
-Learning rate
+For each of 100 iterations, the script samples:
 
-Momentum
+Learning rate: 0 → 0.2
 
-Number of neurons in hidden layers
+Momentum: 0 → 1
 
-A new CNN is then trained for each sampled hyperparameter set.
+Hidden neurons: 10 → 50
 
-Trains the CNN
-Each model trains for:
+A new CNN is trained using these randomly chosen values.
 
-10 epochs
+🚀 Training
 
-Batch size 100
+Optimizer: SGD with Nesterov momentum
 
-80/20 train–validation split
+Loss: Categorical crossentropy
 
-Evaluation utilities included
-A confusion-matrix and per-class accuracy function is implemented but currently unused.
+Metrics: Accuracy, Precision
 
-Purpose
+Epochs: 10
 
-This pipeline helps identify the best-performing hyperparameter configurations for predicting residue-residue contact categories from tessellation-derived geometric features. It serves as a machine-learning module within a broader protein-structure analysis pipeline based on tessellation concepts.
+Batch size: 100
+
+Validation split: 20%
+
+Training time for each run is printed.
+
+📊 Evaluation Utilities
+
+A helper function (currently commented out) can compute:
+
+Per-class accuracy
+
+Confusion matrix
+
+Overall accuracy
+
+This can be activated for deeper analysis.
+
+🎯 Purpose
+
+This pipeline identifies optimal hyperparameter configurations for predicting protein contact-map categories based on tessellation-derived residue-pair features, forming a key component of a larger protein-structure analysis framework.
